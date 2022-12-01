@@ -1,0 +1,25 @@
+{
+  "name": "brisk-doc",
+  "version": "1.0.0",
+  "description": "brisk doc",
+  "scripts": {
+    "docs:dev": "vuepress-webpack dev docs",
+    "docs:build": "vuepress-webpack build docs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ruixiaozi/brisk-doc.git"
+  },
+  "keywords": [
+    "brisk"
+  ],
+  "author": "ruixiaozi",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ruixiaozi/brisk-doc/issues"
+  },
+  "homepage": "https://github.com/ruixiaozi/brisk-doc#readme",
+  "devDependencies": {
+    "vuepress-webpack": "^2.0.0-beta.53"
+  }
+}
