@@ -29,6 +29,11 @@ module.exports = {
         '/brisk-log/logger.md',
         '/brisk-log/configuration.md',
       ],
+      '/eslint-config-brisk/': [
+        '/eslint-config-brisk/README.md',
+        '/eslint-config-brisk/ts-rules.md',
+        '/eslint-config-brisk/js-rules.md',
+      ],
     }
   } as any),
 }
