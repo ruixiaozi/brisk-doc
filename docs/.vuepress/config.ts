@@ -24,6 +24,11 @@ module.exports = {
         '/brisk-ts-extend/runtime.md',
         '/brisk-ts-extend/decorator.md',
       ],
+      '/brisk-log/': [
+        '/brisk-log/README.md',
+        '/brisk-log/logger.md',
+        '/brisk-log/configuration.md',
+      ],
     }
   } as any),
 }
