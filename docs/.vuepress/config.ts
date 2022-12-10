@@ -34,6 +34,12 @@ module.exports = {
         '/eslint-config-brisk/ts-rules.md',
         '/eslint-config-brisk/js-rules.md',
       ],
+      '/brisk-ioc/': [
+        '/brisk-ioc/README.md',
+        '/brisk-ioc/configuration.md',
+        '/brisk-ioc/manual.md',
+        '/brisk-ioc/auto.md',
+      ],
     }
   } as any),
 }
