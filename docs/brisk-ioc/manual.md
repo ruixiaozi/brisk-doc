@@ -5,6 +5,7 @@
 ```ts
 export function setBean(tragetClassName: string, target: any, region?: Symbol): void;
 export function setBean(TargetClass: Class, target?: any, region?: Symbol): void;
+export function setBean(TargetClass: Class, target?: any, region?: Symbol, customName?: string): void;
 
 export function getBean<T>(tragetClassName: string, region?: Symbol): T | undefined;
 export function getBean<T>(TargetClass: Class<T>, region?: Symbol): T | undefined;
@@ -12,6 +13,7 @@ export function getBean<T>(TargetClass: Class<T>, region?: Symbol): T | undefine
 
 > Class：类的构造方法  
 > target：实例，用于指定bean实例  
+> customName：自定义类名称  
 > region：当前bean放在某个指定域下面，如果不传入，则再默认域；每个域下不能有重名的类
 
 ## 1. 将类加入到IoC容器进行管理
@@ -28,6 +30,9 @@ BriskIoC.setBean(Test3);
 const test3 = new Test3();
 test3.name = '123';
 BriskIoC.setBean(Test3, test3);
+
+// 自定义类名称
+BriskIoC.setBean(Test3, test3, undefined, 'Test31');
 
 // 使用类名，并指定实例
 BriskIoC.setBean('Test3', test3);
