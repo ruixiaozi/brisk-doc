@@ -40,6 +40,11 @@ module.exports = {
         '/brisk-ioc/manual.md',
         '/brisk-ioc/auto.md',
       ],
+      '/brisk-orm/': [
+        '/brisk-orm/README.md',
+        '/brisk-orm/base.md',
+        '/brisk-orm/decorator.md',
+      ],
     }
   } as any),
 }
