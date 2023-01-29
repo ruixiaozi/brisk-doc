@@ -31,7 +31,7 @@ export class DecoratorFactory {
 }
 ```
 
-## 1. setClassCallback - 设置类装饰器回调方法
+## 1. setClassCallback
 
 给当前工厂实例设置类装饰器回调方法，之后通过当前工厂得到的装饰器可以用作类装饰器，并且触发该回调方法。
 
@@ -47,7 +47,7 @@ export type ClassCallbackFunc = (
 
 > 返回值：可以是一个新的构造方法（Class），用来替换类原来的构造方法；也可以不返回
 
-### 案例1（实现单例模式）：
+案例1：实现单例模式
 
 ```ts
 import { DecoratorFactory } from "brisk-ts-extends";
@@ -73,7 +73,7 @@ console.log(singletons['Test1']?.instance?.test); // 1
 console.log(singletons['Test1']?.des?.properties?.[0]?.key); // 'test'
 ```
 
-### 案例2（实现代理类）：
+案例2：实现代理类
 
 ```ts
 import { DecoratorFactory } from "brisk-ts-extends";
@@ -98,7 +98,7 @@ const test11 = new Test11();
 console.log(test11); // { test: 1, test2: 2 }
 ```
 
-## 2. setPropertyCallback - 设置属性（字段）装饰器回调方法
+## 2. setPropertyCallback
 
 给当前工厂实例设置属性（字段）装饰器回调方法，之后通过当前工厂得到的装饰器可以用作属性（字段）装饰器，并且触发该回调方法。
 
@@ -114,7 +114,7 @@ export type PropertyCallbackFunc = (
 > key：当前属性（字段）名称  
 > propertiesDes：运行时属性（字段）的类型描述
 
-### 案例（实现值注入）：
+案例：实现值注入
 
 ```ts
 import { DecoratorFactory } from "brisk-ts-extends";
@@ -147,7 +147,7 @@ console.log((test2.test as any).myName); // 'test'
 console.log((test2.test as any).myValue); // 1
 ```
 
-## 3. setParamCallback - 设置参数装饰器回调方法
+## 3. setParamCallback 
 
 给当前工厂实例设置参数装饰器回调方法，之后通过当前工厂得到的装饰器可以用作参数装饰器，并且触发该回调方法。
 
@@ -165,7 +165,7 @@ export type ParamCallbackFunc = (
 > index：当前参数在方法参数列表的位置  
 > param：运行时当前参数的类型描述
 
-### 案例（实现向参数中添加元数据）：
+案例：实现向参数中添加元数据
 
 ```ts
 import { DecoratorFactory } from "brisk-ts-extends";
@@ -191,7 +191,7 @@ const test3Des = get('Test3');
 console.log(test3Des.functions?.[0]?.params?.[0]?.meta?.required); // true
 ```
 
-## 4. setMethodCallback - 设置方法装饰器回调方法
+## 4. setMethodCallback
 
 给当前工厂实例设置方法装饰器回调方法，之后通过当前工厂得到的装饰器可以用作方法装饰器，并且触发该回调方法。
 
@@ -211,7 +211,7 @@ export type MethodCallbackFunc = (
 
 > 返回值：可以返回一个属性描述符，用于替换方法本身的属性描述符；也可以不返回
 
-### 案例（实现方法代理）：
+案例：实现方法代理
 
 ```ts
 function MethodDecoratorTest() {

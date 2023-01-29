@@ -1,57 +1,59 @@
-# 基本用法
+# API
 
-## 连接数据库/断开连接
+## 1. connect
 
-1. 连接数据库 
+连接数据库，方法签名：
 
-  方法签名：
+```ts
+function connect(option: BriskOrmConnectOption): void;
+```
 
-  ```ts
-  function connect(option: BriskOrmConnectOption): void;
-  ```
+选项结构：
 
-  选项结构：
+```ts
+interface BriskOrmConnectOption {
+host: string;
+port?: number;
+user: string;
+password: string;
+database: string;
+charset?: string;
+}
+```
 
-  ```ts
-  interface BriskOrmConnectOption {
-    host: string;
-    port?: number;
-    user: string;
-    password: string;
-    database: string;
-    charset?: string;
-  }
-  ```
+案例：连接mysql数据库
 
-  ```ts
-  import BriskOrm from 'brisk-orm';
+```ts
+import BriskOrm from 'brisk-orm';
 
-  BriskOrm.connect({
-    host: 'xxx.xxx.xxx',
-    user: 'xxxx',
-    password: 'xxxxx',
-    database: 'xxxx'
-  })
-  ```
+BriskOrm.connect({
+host: 'xxx.xxx.xxx',
+user: 'xxxx',
+password: 'xxxxx',
+database: 'xxxx'
+})
+```
 
-2. 断开连接
+## 2. distory
 
-  方法签名：
+断开连接，方法签名：
 
-  ```ts
-  function distory(): Promise<void>;
-  ```
+```ts
+function distory(): Promise<void>;
+```
 
-  ```ts
-  import BriskOrm from 'brisk-orm';
+案例：断开连接
 
-  await BriskOrm.distory();
-  ```
+```ts
+import BriskOrm from 'brisk-orm';
+
+await BriskOrm.distory();
+```
 
 
-## 获取一个查询方法
+## 3. getSelect
 
-方法签名：
+获取一个查询方法，用于执行查询语句，方法签名：
 
 ```ts
 /**
@@ -92,7 +94,7 @@ interface BriskOrmResultOption {
 type BriskOrmSelectFunction<T = any> = (...args: any[]) => Promise<T>;
 ```
 
-### 案例1（查询所有数据）
+案例：查询所有数据
 
 ```ts
 import BriskOrm from 'brisk-orm';
@@ -111,9 +113,9 @@ const selectFunc = BriskOrm.getSelect<T1[] | undefined>('select * from test', T1
 const res = await selectFunc();
 ```
 
-## 获取一个插入方法
+## 4. getInsert
 
-方法签名：
+获取一个插入方法，用于执行插入语句，方法签名：
 
 ```ts
 /**
@@ -136,7 +138,7 @@ interface BriskOrmOperationResult {
 type BriskOrmInsertFunction<T = any> = (data: T) => Promise<BriskOrmOperationResult>;
 ```
 
-### 案例1（插入一条数据）
+案例1：插入一条数据
 
 ```ts
 import BriskOrm from 'brisk-orm';
@@ -152,7 +154,7 @@ const res = await insertOne({
 });
 ```
 
-### 案例2（插入多条数据）
+案例1：插入多条数据
 
 ```ts
 import BriskOrm from 'brisk-orm';
@@ -168,9 +170,9 @@ const res = await insertMany([
 ]);
 ```
 
-## 获取一个更新方法
+## 5. getUpdate
 
-方法签名：
+获取一个更新方法，用于执行更新语句，方法签名：
 
 ```ts
 /**
@@ -188,7 +190,7 @@ function getUpdate<T>(sql: string, propertis: string[]): BriskOrmUpdateFunction<
 type BriskOrmUpdateFunction<T = any> = (data: T, ...args: any[]) => Promise<BriskOrmOperationResult>;
 ```
 
-### 案例1（更新一条数据）
+案例：更新一条数据
 
 ```ts
 import BriskOrm from 'brisk-orm';
@@ -204,9 +206,9 @@ const res = await update({
 });
 ```
 
-## 获取一个删除方法
+## 6. getDelete
 
-方法签名：
+获取一个删除方法，用于执行删除语句，方法签名：
 
 ```ts
 /**
@@ -223,7 +225,7 @@ function getDelete(sql: string): BriskOrmDeleteFunction;
 type BriskOrmUpdateFunction<T = any> = (data: T, ...args: any[]) => Promise<BriskOrmOperationResult>;
 ```
 
-### 案例1（删除一条数据）
+案例：删除一条数据
 
 ```ts
 import BriskOrm from 'brisk-orm';

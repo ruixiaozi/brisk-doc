@@ -25,7 +25,7 @@ BriskORM 是一个基于nodejs的快速，轻量级，轻快的ORM，支持mysql
     npm i brisk-orm
     ```
 
-2. 使用
+3. 使用
 
     entity/TestEntity.ts:
 

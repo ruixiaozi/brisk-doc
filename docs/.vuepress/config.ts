@@ -37,13 +37,18 @@ module.exports = {
       '/brisk-ioc/': [
         '/brisk-ioc/README.md',
         '/brisk-ioc/configuration.md',
-        '/brisk-ioc/manual.md',
-        '/brisk-ioc/auto.md',
+        '/brisk-ioc/decorator.md',
+        '/brisk-ioc/api.md',
       ],
       '/brisk-orm/': [
         '/brisk-orm/README.md',
-        '/brisk-orm/base.md',
         '/brisk-orm/decorator.md',
+        '/brisk-orm/api.md',
+      ],
+      '/brisk-controller/': [
+        '/brisk-controller/README.md',
+        '/brisk-controller/decorator.md',
+        '/brisk-controller/api.md',
       ],
     }
   } as any),

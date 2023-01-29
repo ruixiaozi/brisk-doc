@@ -1,10 +1,14 @@
-# 装饰器用法
+# 装饰器
 
-## Select与Result 装饰器
+通过 `BriskIoC.scanBean` 方法扫描指定路径（见[IoC配置](../brisk-ioc/configuration.html)）下的所有文件，被相关装饰器装饰的类将被容器自动收集管理。
 
-方法装饰器，用于给方法注入一个select操作。
+## 基础装饰器
 
-方法签名：
+基础装饰器为方法装饰器，用于将一个方法与一个特定的数据库语句进行映射。可通过基础装饰器为特定类创建自定义数据库操作的映射方法。
+
+### 1. Select 与 Result
+
+方法装饰器，用于给方法注入一个select操作，装饰器签名：
 
 ```ts
 /**
@@ -23,10 +27,10 @@ function Select(sql: string, id?: string): Function;
 function Result(Target: Class, option?: BriskOrmResultOption): Function;
 ```
 
-> 选项结构参考基本用法。
+> 选项结构参考 [API#getSelect](./api)。
 
 
-### 案例1（查询所有数据）
+案例：查询所有数据
 
 ```ts
 class Info {
@@ -43,11 +47,9 @@ class Test {
 const res = await new Test().findList(0);
 ```
 
-## Insert 装饰器
+### 2. Insert
 
-方法装饰器，用于给方法注入一个Insert操作。
-
-方法签名：
+方法装饰器，用于给方法注入一个Insert操作，装饰器签名：
 
 ```ts
 /**
@@ -59,7 +61,7 @@ const res = await new Test().findList(0);
 function Insert(sql: string, propertis: string[]): Function;
 ```
 
-### 案例1（插入一条数据）
+案例：插入一条数据
 
 ```ts
 class Info {
@@ -76,11 +78,9 @@ class Test {
 const res = await new Test().insertInfo({name: '5', age: 123});
 ```
 
-## Update 装饰器
+### 3. Update
 
-方法装饰器，用于给方法注入一个Update操作。
-
-方法签名：
+方法装饰器，用于给方法注入一个Update操作，装饰器签名：
 
 ```ts
 /**
@@ -93,7 +93,7 @@ function Update(sql: string, propertis: string[]): Function;
 ```
 
 
-### 案例1（更新一条数据）
+案例：更新一条数据
 
 ```ts
 class Info {
@@ -110,11 +110,9 @@ class Test {
 const res = await new Test().updateInfo({name: '4', age: 444});
 ```
 
-## Delete 装饰器
+### 4. Delete
 
-方法装饰器，用于给方法注入一个Delete操作。
-
-方法签名：
+方法装饰器，用于给方法注入一个Delete操作，装饰器签名：
 
 ```ts
 /**
@@ -126,7 +124,7 @@ function Delete(sql: string): Function
 ```
 
 
-### 案例1（删除一条数据）
+案例：删除一条数据
 
 ```ts
 class Info {
@@ -143,11 +141,13 @@ class Test {
 const res = await new Test().deleteInfo('4');
 ```
 
-## Table 装饰器
+## 操作装饰器
 
-类装饰器，用于将一个类声明为数据表的一个映射类。
+操作装饰器将自动创建基础的数据表操作映射，包括表结构映射、基础的增删改查操作映射。
 
-方法签名：
+### 1. Table
+
+类装饰器，用于将一个类声明为数据表的一个映射类，装饰器签名：
 
 ```ts
 /**
@@ -159,7 +159,7 @@ function Table(dbTableName: string): Function
 ```
 
 
-### 案例1（声明一个数据表类）
+案例：声明一个数据表类
 
 ```ts
 @Table('test')
@@ -168,11 +168,9 @@ class Info {
 }
 ```
 
-## PrimaryKey 装饰器
+### 2. PrimaryKey
 
-属性装饰器，用于将一个类属性声明为一个数据表的主键（当前类需要使用Table装饰器声明）
-
-方法签名：
+属性装饰器，用于将一个类属性声明为一个数据表的主键（当前类需要使用Table装饰器声明），装饰器签名：
 
 ```ts
 /**
@@ -184,7 +182,7 @@ function PrimaryKey(dbName?: string): Function
 ```
 
 
-### 案例1（声明一个主键）
+案例：声明一个主键
 
 ```ts
 @Table('test')
@@ -194,11 +192,9 @@ class Info {
 }
 ```
 
-## Column 装饰器
+### 3. Column 
 
-属性装饰器，用于将一个类属性声明为一个数据表的列（当前类需要使用Table装饰器声明）
-
-方法签名：
+属性装饰器，用于将一个类属性声明为一个数据表的列（当前类需要使用Table装饰器声明），装饰器签名：
 
 ```ts
 /**
@@ -210,7 +206,7 @@ function Column(dbName?: string): Function
 ```
 
 
-### 案例1（声明一个列）
+案例：声明一个列
 
 ```ts
 @Table('test')
@@ -223,11 +219,9 @@ class Info {
 }
 ```
 
-## Many 装饰器
+### 4. Many
 
-属性装饰器，用于将一个类属性声明为一对多映射（当前类需要使用Table装饰器声明）
-
-方法签名：
+属性装饰器，用于将一个类属性声明为一对多映射（当前类需要使用Table装饰器声明），装饰器签名：
 
 ```ts
 /**
@@ -241,7 +235,7 @@ function Many(Entity: Class, foreignKey: string, targetDbName: string): Function
 ```
 
 
-### 案例1（声明一对多映射）
+案例：声明一对多映射
 
 ```ts
 @Table('test')
@@ -266,11 +260,9 @@ class Info2 {
 }
 ```
 
-## One 装饰器
+### 5. One
 
-属性装饰器，用于将一个类属性声明为一对一或者多对一映射（当前类需要使用Table装饰器声明）
-
-方法签名：
+属性装饰器，用于将一个类属性声明为一对一或者多对一映射（当前类需要使用Table装饰器声明），装饰器签名：
 
 ```ts
 /**
@@ -284,7 +276,7 @@ function One(Entity: Class, foreignKey: string, targetDbName: string): Function
 ```
 
 
-### 案例1（声明一对一或者多对一映射）
+案例：声明一对一或者多对一映射
 
 ```ts
 @Table('test')
@@ -309,11 +301,9 @@ class Info2 {
 }
 ```
 
-## Dao 装饰器
+### 6. Dao
 
-类装饰器，用于将一个类声明为Dao类，该类继承BriskOrmDao\<T\>，框架已经实现了部分常用的ORM操作。
-
-方法签名：
+类装饰器，用于将一个类声明为Dao类，该类继承BriskOrmDao\<T\>，框架已经实现了部分常用的ORM操作。装饰器签名：
 
 ```ts
 /**
@@ -325,7 +315,7 @@ function Dao<K>(Entity: Class<K>): <T extends BriskOrmDao<K>>(Target: Class<T>, 
 ```
 
 
-### 案例1（声明Dao类）
+案例：声明Dao类
 
 ```ts
 @Table('test')

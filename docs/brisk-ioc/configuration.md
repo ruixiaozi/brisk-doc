@@ -17,15 +17,13 @@ interface BriskIoCOption {
 }
 ```
 
-## 全局配置
-
 方法签名：
 
 ```ts
 export function configure(option: BriskIoCOption): void;
 ```
 
-### 案例1（配置原型模式）
+## 配置原型模式
 
 ```ts
 import BriskIoC from 'brisk-ioc';
@@ -42,7 +40,7 @@ const bean2 = BriskIoC.getBean(Test3);
 console.log(bean1 === bean2); // false
 ```
 
-### 案例2（配置扫描路径）
+## 配置扫描路径
 
 ```ts
 import BriskIoC from 'brisk-ioc';
