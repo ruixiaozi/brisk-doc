@@ -66,11 +66,13 @@ brisk-ioc 一款使用 typescript 实现的依赖注入（DI/IOC）容器库，�
     ```ts
     import BriskIoC from 'brisk-ioc';
     import path from 'path';
+    // T2静态导入，且Service装饰器自动加入容器
     import { T2 } from './service/T2';
 
     (async function() {
       BriskIoC.configure({
-        beanPathes: [path.join(__dirname, './bean'), path.join(__dirname, './service')]
+	    // 扫描bean下的容器
+        beanPathes: [path.join(__dirname, './bean')]
       });
       BriskIoC.onBeforeScan(() => {
         console.log(123);

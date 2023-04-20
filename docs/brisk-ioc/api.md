@@ -12,7 +12,7 @@ export function configure(option: BriskIoCOption): void;
 
 ## 2. scanBean
 
-通过 `scanBean` 方法对通过 `configure` 配置的路径列表 进行扫描，将相关的 `装饰器` 类进行预处理，方法签名：
+通过 `scanBean` 方法对通过 `configure` 配置的路径列表 进行动态扫描，将相关的 `装饰器` 类进行预处理，如果已经通过静态module导入，则无需进行动态扫描，方法签名：
 
 ```ts
 export function scanBean(): Promise<void>;
