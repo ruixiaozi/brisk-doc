@@ -70,7 +70,9 @@ export declare enum BRISK_CONTROLLER_PARAMETER_IS_E {
     FILE = "file",
     COOKIE = "cookie",
     // 不需要赋值参数
-    NULL = "null"
+    NULL = "null",
+    // 用于拦截器、转发请求传递数据
+    STATE='state',
 }
 
 // TODO: 校验器
@@ -100,15 +102,33 @@ export interface BriskControllerInterceptorOption {
   baseUrl?: string;
 }
 
+export interface BriskControllerSwaggerTag {
+  name: string;
+  description?: string;
+}
+
+export interface BriskControllerRedirectInfo {
+  // 可能的跳转地址列表
+  urls: string[];
+  // 默认301
+  status?: number;
+}
+
 export interface BriskControllerRequestOption extends BriskControllerInterceptorOption {
-  // 名称
+  // 操作名称，用于客户端生成接口调用方法名，保证同以tag下唯一
+  name?: string;
+  // 接口标题
   title?: string;
   // 描述
   description?: string;
   // 参数列表
   params?: BriskControllerParameter[];
   // 标签
-  tag?: string;
+  tag?: BriskControllerSwaggerTag;
+  // 成功响应体类型，默认为any类型
+  successResponseType?: TypeKind;
+  // 跳转信息，仅当返回redrect方法时
+  redirect?: BriskControllerRedirectInfo;
 }
 ```
 
@@ -155,7 +175,7 @@ const app = await BriskController.start();
  * @param status 状态码，默认301
  * @returns
  */
-export function redirect(targetPath: string, status: number = 301): any;
+export function redirect(targetPath: string, status: number = 301): BriskControllerRedirect;
 ```
 
 案例：301跳转
@@ -165,6 +185,11 @@ import BriskController from 'brisk-controller';
 
 BriskController.addRequest('/test12/2', () => {
   return redirect('/test12/1');
+}, {
+  redirect: {
+    targetPath: '/test12/1',
+	status: 301
+  }
 });
 const app = await BriskController.start();
 // 访问 http://localhost:3000/test12/2
@@ -182,7 +207,7 @@ const app = await BriskController.start();
  * @param method 转发方法，默认get
  * @returns
  */
-export function forward(targetPath: string, method = BRISK_CONTROLLER_METHOD_E.GET): any;
+export async function forward<T>(targetPath: string, method = BRISK_CONTROLLER_METHOD_E.GET): Promise<T>
 ```
 
 案例：路由转发
@@ -195,8 +220,8 @@ BriskController.addRequest('/test13/1', () => {
 	msg: 'test13'
   };
 });
-BriskController.addRequest('/test13/2', () => {
-  return forward('/test13/1');
+BriskController.addRequest('/test13/2', async () => {
+  return await forward('/test13/1');
 });
 const app = await BriskController.start();
 // 访问 http://localhost:3000/test13/2

@@ -20,8 +20,8 @@ export function Controller(baseUrl?: string, option?: BriskControllerDecoratorOp
 
 ```ts
 export interface BriskControllerDecoratorOption {
-  // 当前控制器的标签，用于swagger分类，默认为类名
-  tag?: string;
+  // 当前控制器的标签，用于swagger分类，默认为类名作为tag的name
+  tag?: BriskControllerSwaggerTag;
 }
 ```
 
@@ -30,7 +30,7 @@ export interface BriskControllerDecoratorOption {
 ```ts
 import { Controller } from 'brisk-controller';
 
-@Controller('/test', { tag: 'test1' })
+@Controller('/test', { tag: { name: 'test1' } })
 class TestDecorator1 {
 
 }
@@ -53,13 +53,23 @@ export function RequestMapping(path: string, option?: BriskControllerDecoratorRe
 选项结构：
 
 ```ts
+export interface BriskControllerRedirectInfo {
+  // 可能的跳转地址列表
+  urls: string[];
+  // 默认301
+  status?: number;
+}
 export interface BriskControllerDecoratorRequest {
+  // 操作名称，用于客户端生成操作方法名，默认为当前装饰的方法名
+  name?: string;
   // 标题，用于swagger显示
   title?: string;
   // 描述，用于swagger显示
   description?: string;
   // 默认为get
   method?: BRISK_CONTROLLER_METHOD_E;
+  // 跳转信息，仅当返回redrect方法时
+  redirect?: BriskControllerRedirectInfo;
 }
 ```
 
@@ -68,7 +78,7 @@ export interface BriskControllerDecoratorRequest {
 ```ts
 import { Controller, RequestMapping, BRISK_CONTROLLER_METHOD_E } from 'brisk-controller';
 
-@Controller('/test', { tag: 'test1' })
+@Controller('/test', { tag: { name: 'test1' } })
 class TestDecorator1 {
   test1Data = 'test1';
 
@@ -84,6 +94,14 @@ class TestDecorator1 {
 	return {
 	  msg: this.test1Data
 	}
+  }
+
+  @RequestMapping('/test3', { redirect: {
+	targetPath: '/myRedirect',
+	status: 301
+  }})
+  test3() {
+	return redirect('/myRedirect');
   }
 }
 ```
@@ -124,7 +142,7 @@ class TestParam2 {
   d!: Array<string>;
 }
 
-@Controller('/test', { tag: 'test1' })
+@Controller('/test', { tag: { name: 'test1' } })
 class TestDecorator1 {
   test1Data = 'test1';
 
@@ -157,7 +175,7 @@ export function InBody(option?: BriskControllerDecoratorParam): Function;
 ```ts
 import { Controller, RequestMapping, InBody, BRISK_CONTROLLER_METHOD_E } from 'brisk-controller';
 
-@Controller('/test', { tag: 'test1' })
+@Controller('/test', { tag: { name: 'test1' } })
 class TestDecorator1 {
   test1Data = 'test1';
 
@@ -190,7 +208,7 @@ export function InQuery(option?: BriskControllerDecoratorParam): Function;
 ```ts
 import { Controller, RequestMapping, InQuery, BRISK_CONTROLLER_METHOD_E } from 'brisk-controller';
 
-@Controller('/test', { tag: 'test1' })
+@Controller('/test', { tag: { name: 'test1' } })
 class TestDecorator1 {
   test1Data = 'test1';
 
@@ -223,7 +241,7 @@ export function InFormData(option?: BriskControllerDecoratorParam): Function;
 ```ts
 import { Controller, RequestMapping, InFormData, BRISK_CONTROLLER_METHOD_E } from 'brisk-controller';
 
-@Controller('/test', { tag: 'test1' })
+@Controller('/test', { tag: { name: 'test1' } })
 class TestDecorator1 {
   test1Data = 'test1';
 
@@ -256,7 +274,7 @@ export function InHeader(option?: BriskControllerDecoratorParam): Function;
 ```ts
 import { Controller, RequestMapping, InHeader, BRISK_CONTROLLER_METHOD_E } from 'brisk-controller';
 
-@Controller('/test', { tag: 'test1' })
+@Controller('/test', { tag: { name: 'test1' } })
 class TestDecorator1 {
   test1Data = 'test1';
 
@@ -289,7 +307,7 @@ export function InPath(option?: BriskControllerDecoratorParam): Function;
 ```ts
 import { Controller, RequestMapping, InPath, BRISK_CONTROLLER_METHOD_E } from 'brisk-controller';
 
-@Controller('/test', { tag: 'test1' })
+@Controller('/test', { tag: { name: 'test1' } })
 class TestDecorator1 {
   test1Data = 'test1';
 
@@ -322,7 +340,7 @@ export function InCookie(option?: BriskControllerDecoratorParam): Function;
 ```ts
 import { Controller, RequestMapping, InCookie, BRISK_CONTROLLER_METHOD_E } from 'brisk-controller';
 
-@Controller('/test', { tag: 'test1' })
+@Controller('/test', { tag: { name: 'test1' } })
 class TestDecorator1 {
   test1Data = 'test1';
 
@@ -367,7 +385,7 @@ export interface BriskControllerDecoratorInterceptor {
 ```ts
 import { Controller, RequestMapping, InQuery, Interceptor, BRISK_CONTROLLER_METHOD_E, BriskControllerRequest } from 'brisk-controller';
 
-@Controller('/test', { tag: 'test1' })
+@Controller('/test', { tag: { name: 'test1' } })
 class TestDecorator1 {
   test1Data = 'test1';
 
@@ -379,6 +397,42 @@ class TestDecorator1 {
 
   @RequestMapping('/test2', { method: BRISK_CONTROLLER_METHOD_E.POST })
   test2(@InQuery() a: number) {
+	return {
+	  msg: this.test1Data
+	}
+  }
+}
+```
+
+## 12. State
+
+参数装饰器（仅用于被RequestMapping装饰器装饰的方法参数），将对应参数与state中的某个字段进行值映射，拦截器中可通过 `request.ctx.state.XXX` 设置值，装饰器签名：
+
+```ts
+/**
+ * State 装饰器，用于拦截器、转发请求传递数据
+ * @returns
+ */
+export function State(): Function;
+```
+
+案例：拦截器设置值
+
+```ts
+import { Controller, RequestMapping, State, Interceptor, BRISK_CONTROLLER_METHOD_E, BriskControllerRequest } from 'brisk-controller';
+
+@Controller('/test', { tag: { name: 'test1' } })
+class TestDecorator1 {
+  test1Data = 'test1';
+
+  @Interceptor('/test2')
+  test5Intercptor(req: BriskControllerRequest) {
+	req.ctx.state.a = 2;
+	return true;
+  }
+
+  @RequestMapping('/test2', { method: BRISK_CONTROLLER_METHOD_E.POST })
+  test2(@State() a: number) {
 	return {
 	  msg: this.test1Data
 	}
