@@ -3,7 +3,7 @@ import { webpackBundler } from '@vuepress/bundler-webpack';
 
 module.exports = {
   title: 'Brisk',
-  base: '/brisk/',
+  base: '/',
   description: 'Brisk系列：基于nodejs的系列库',
   theme: defaultTheme({
     // 默认主题配置

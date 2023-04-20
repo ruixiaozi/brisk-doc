@@ -62,10 +62,16 @@ await BriskOrm.distory();
  * @param Target 结果对象的类
  * @param option 结果选项
  * @param id sql语句的唯一标识
- * @param propertyArgs 作为字段名称的参数序号
+ * @param sqlArgs 作为原生SQL插入的参数序号
  * @returns select方法
  */
-function getSelect<T>(sql: string, Target?: Class, option?: BriskOrmResultOption, id?: string, propertyArgs?: number[]): BriskOrmSelectFunction<T>;
+export function getSelect<T>(
+  sql: string,
+  Target?: Class,
+  option?: BriskOrmResultOption,
+  id?: string,
+  sqlArgs?: number[],
+): BriskOrmSelectFunction<T>;
 ```
 
 选项结构：
@@ -89,8 +95,11 @@ interface BriskOrmResultOption {
   isList?: boolean;
   // 映射关系，key为类字段，value为数据库字段
   mapping?: BriskOrmEntityMapping;
+  // 默认false
+  isCount?: boolean;
 }
 
+// 如果开启事务，args最后一个参数需要传入ctx上下文
 type BriskOrmSelectFunction<T = any> = (...args: any[]) => Promise<T>;
 ```
 
@@ -135,7 +144,8 @@ interface BriskOrmOperationResult {
   affectedRows: number;
 }
 
-type BriskOrmInsertFunction<T = any> = (data: T) => Promise<BriskOrmOperationResult>;
+// 如果开启事务，需要传入ctx上下文
+type BriskOrmInsertFunction<T = any> = (data: T ctx?: BriskOrmContext) => Promise<BriskOrmOperationResult>;
 ```
 
 案例1：插入一条数据
@@ -179,14 +189,22 @@ const res = await insertMany([
  * 获取一个update方法，用于更新
  * @param sql sql语句
  * @param propertis 修改对象的字段列表，需要按set顺序填写
- * @returns update方法
+ * @param mapping 映射对象
+ * @param sqlArgs 作为原生SQL插入的参数序号
+ * @returns
  */
-function getUpdate<T>(sql: string, propertis: string[]): BriskOrmUpdateFunction<T>;
+function getUpdate<T>(
+  sql: string,
+  propertis: string[],
+  mapping?: BriskOrmEntityMapping,
+  sqlArgs?: number[],
+): BriskOrmUpdateFunction<T>;
 ```
 
 选项结构：
 
 ```ts
+// 如果开启事务，args最后一个参数需要传入ctx上下文
 type BriskOrmUpdateFunction<T = any> = (data: T, ...args: any[]) => Promise<BriskOrmOperationResult>;
 ```
 
@@ -214,14 +232,21 @@ const res = await update({
 /**
  * 获取一个delete方法，用于更新
  * @param sql sql语句
- * @returns delete方法
+ * @param mapping 映射对象
+ * @param sqlArgs 作为原生SQL插入的参数序号
+ * @returns
  */
-function getDelete(sql: string): BriskOrmDeleteFunction;
+function getDelete(
+  sql: string,
+  mapping?: BriskOrmEntityMapping,
+  sqlArgs?: number[],
+): BriskOrmDeleteFunction;
 ```
 
 选项结构：
 
 ```ts
+// 如果开启事务，args最后一个参数需要传入ctx上下文
 type BriskOrmUpdateFunction<T = any> = (data: T, ...args: any[]) => Promise<BriskOrmOperationResult>;
 ```
 
@@ -232,4 +257,90 @@ import BriskOrm from 'brisk-orm';
 
 const deleteFunc = BriskOrm.getDelete('delete from test where name = ?');
 const res = await deleteFunc('11');
+```
+
+## 7. startTransaction
+
+开启手动事务方法，返回一个上下文对象，可通过该对象进行事务控制，方法签名：
+
+```ts
+/**
+ * 开启手动事务
+ * @returns ctx BriskOrmContext
+ */
+export async function startTransaction(): Promise<BriskOrmContext>;
+```
+
+上下文对象：
+
+```ts
+export interface BriskOrmContext {
+  // 事务回滚
+  rollback: (transactionName: string) => Promise<void> | undefined;
+  // 事务提交
+  commit: () => Promise<void> | undefined;
+  // 事务结束（必须调用）
+  end: () => void | undefined;
+  // 内部使用，忽略
+  query: (options: QueryOptions) => Promise<any> | undefined;
+}
+```
+
+案例：简单的事务管理
+
+```ts
+const ctx = await startTransaction();
+try {
+  class T6 {
+	name?: string;
+	age?: number;
+  }
+  const updateT6 = getUpdate<T6>('update test set age = ? where name = ?', ['age', 'name']);
+  const res1 = await updateT6({
+	name: '11',
+	age: 11
+  },);
+  if (!res1.affectedRows) {
+	throw new Error();
+  }
+  const deleteFunc = getDelete('delete from test where name = ?');
+  const res = await deleteFunc('2', ctx);
+
+  await ctx.commit();
+} catch (error) {
+  await ctx.rollback('test');
+} finally {
+  ctx.end();
+}
+```
+
+## 8. transaction
+
+开启自动事务，方法签名：
+
+```ts
+/**
+ * 自动事务
+ * @param handler 事务实际业务处理器
+ * @param transactionName 事务名称，用于表示当前事务
+ */
+export async function transaction(handler: (ctx: BriskOrmContext) => any, transactionName: string): Promise<void>;
+```
+
+案例：简单的自动事务
+
+```ts
+await transaction(async(ctx) => {
+  class T7 {
+	name?: string;
+	age?: number;
+  }
+  const updateT7 = getUpdate<T7>('update test set age = ? where name = ?', ['age', 'name']);
+  const res1 = await updateT7({
+	name: '11',
+	age: 11
+  },);
+  const deleteFunc = getDelete('delete from test where name = ?');
+  const res = await deleteFunc('2', ctx);
+}, 'test');
 ```

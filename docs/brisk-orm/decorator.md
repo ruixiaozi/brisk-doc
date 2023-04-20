@@ -6,7 +6,7 @@
 
 基础装饰器为方法装饰器，用于将一个方法与一个特定的数据库语句进行映射。可通过基础装饰器为特定类创建自定义数据库操作的映射方法。
 
-### 1. Select 与 Result
+### 1. Select、Result与Raw
 
 方法装饰器，用于给方法注入一个select操作，装饰器签名：
 
@@ -25,6 +25,12 @@ function Select(sql: string, id?: string): Function;
  * @returns
  */
 function Result(Target: Class, option?: BriskOrmResultOption): Function;
+/**
+ * Raw参数 装饰器
+ * 被该装饰器装饰的参数，加入getSelect的sqlArgs参数中
+ * @returns
+ */
+export function Raw(): Function
 ```
 
 > 选项结构参考 [API#getSelect](./api)。
@@ -139,6 +145,48 @@ class Test {
 
 }
 const res = await new Test().deleteInfo('4');
+```
+
+### 5. Transaction
+
+方法装饰器，用于将一个方法进行自动事务管理，默认给方法最后一个参数传入ctx上下文对象。如果在调用此方法时，手动传入了其他ctx，则不出触发自动事务，装饰器签名：
+
+```ts
+/**
+ * Transaction装饰器
+ * 被Transaction装饰器修饰的方法，成为自动事务方法
+ * 该方法最后一个参数为ctx，默认会被自动注入BriskOrmContext实例
+ * 如果调用时手动传入ctx，则不会触发自动事务
+ */
+export function Transaction(): Function;
+```
+
+案例：自动事务
+
+```ts
+@Table('test')
+class Test9Entity {
+  @PrimaryKey('name')
+  myName?: string;
+
+  @Column('age')
+  myAge?: number;
+}
+
+@Dao(Test9Entity)
+class TestDao3 extends BriskOrmDao<Test9Entity> {
+}
+class TestService9 {
+
+  @Transaction()
+  async test(ctx?: BriskOrmContext) {
+	const res1 = await new TestDao3().updateByPrimaryKey({
+	  myName: '123',
+	  myAge: 12
+	}, ctx)
+	const res2 = await new TestDao3().deleteByPrimaryKey('mynam', ctx);
+  }
+}
 ```
 
 ## 操作装饰器
@@ -312,6 +360,88 @@ class Info2 {
  * @returns
  */
 function Dao<K>(Entity: Class<K>): <T extends BriskOrmDao<K>>(Target: Class<T>, ...args: any[]) => any
+```
+
+BriskOrmDao定义如下：
+
+```ts
+export interface BriskOrmPage {
+  // 第几页，0开始
+  page: number;
+  // 页大小
+  pageSize: number;
+}
+
+class BriskOrmQuery<T> {
+    eq(key: keyof T, value: any): BriskOrmQuery<T>;
+    ne(key: keyof T, value: any): BriskOrmQuery<T>;
+    gt(key: keyof T, value: any): BriskOrmQuery<T>;
+    ge(key: keyof T, value: any): BriskOrmQuery<T>;
+    lt(key: keyof T, value: any): BriskOrmQuery<T>;
+    le(key: keyof T, value: any): BriskOrmQuery<T>;
+    between(key: keyof T, value1: any, value2: any): BriskOrmQuery<T>;
+    notBetween(key: keyof T, value1: any, value2: any): BriskOrmQuery<T>;
+    like(key: keyof T, value: any): BriskOrmQuery<T>;
+    notLike(key: keyof T, value: any): BriskOrmQuery<T>;
+    likeLeft(key: keyof T, value: any): BriskOrmQuery<T>;
+    likeRight(key: keyof T, value: any): BriskOrmQuery<T>;
+    notLikeLeft(key: keyof T, value: any): BriskOrmQuery<T>;
+    notLikeRight(key: keyof T, value: any): BriskOrmQuery<T>;
+    isNull(key: keyof T): BriskOrmQuery<T>;
+    isNotNull(key: keyof T): BriskOrmQuery<T>;
+    in(key: keyof T, value: any[]): BriskOrmQuery<T>;
+    notIn(key: keyof T, value: any[]): BriskOrmQuery<T>;
+    nested(sub: BriskOrmSubConditionFactor<T>): BriskOrmQuery<T>;
+    or(sub?: BriskOrmSubConditionFactor<T>): BriskOrmQuery<T>;
+    and(sub?: BriskOrmSubConditionFactor<T>): BriskOrmQuery<T>;
+    everyEq(entity: Partial<T>): BriskOrmQuery<T>;
+    someEq(entity: Partial<T>): BriskOrmQuery<T>;
+    groupBy(...keys: (keyof T)[]): BriskOrmQuery<T>;
+    orderBy(direction: BRISK_ORM_ORDER_BY_E, ...keys: (keyof T)[]): BriskOrmQuery<T>;
+    toSqlString(mapping: BriskOrmEntityMapping): string;
+    toWhereSqlString(mapping: BriskOrmEntityMapping): string;
+}
+
+class BriskOrmDao<K> {
+    count(ctx?: BriskOrmContext): Promise<number | undefined>;
+    countQuery(query: BriskOrmQuery<K>, ctx?: BriskOrmContext): Promise<number | undefined>;
+    countEveryEq(queryEntity: Partial<K>, ctx?: BriskOrmContext): Promise<number | undefined>;
+    countSomeEq(queryEntity: Partial<K>, ctx?: BriskOrmContext): Promise<number | undefined>;
+    list(ctx?: BriskOrmContext): Promise<K[] | undefined>;
+    listQuery(query: BriskOrmQuery<K>, ctx?: BriskOrmContext): Promise<K[] | undefined>;
+    listEveryEq(queryEntity: Partial<K>, ctx?: BriskOrmContext): Promise<K[] | undefined>;
+    listSomeEq(queryEntity: Partial<K>, ctx?: BriskOrmContext): Promise<K[] | undefined>;
+    page(page: BriskOrmPage, ctx?: BriskOrmContext): Promise<K[] | undefined>;
+    pageQuery(query: BriskOrmQuery<K>, page: BriskOrmPage, ctx?: BriskOrmContext): Promise<K[] | undefined>;
+    pageEveryEq(queryEntity: Partial<K>, page: BriskOrmPage, ctx?: BriskOrmContext): Promise<K[] | undefined>;
+    pageSomeEq(queryEntity: Partial<K>, page: BriskOrmPage, ctx?: BriskOrmContext): Promise<K[] | undefined>;
+    findByPrimaryKey(_value: any, ctx?: BriskOrmContext): Promise<K | undefined>;
+    findQuery(query: BriskOrmQuery<K>, ctx?: BriskOrmContext): Promise<K | undefined>;
+    findEveryEq(queryEntity: Partial<K>, ctx?: BriskOrmContext): Promise<K | undefined>;
+    findSomeEq(queryEntity: Partial<K>, ctx?: BriskOrmContext): Promise<K | undefined>;
+    save(_value: K, ctx?: BriskOrmContext): Promise<BriskOrmOperationResult>;
+    saveAll(_value: K[], ctx?: BriskOrmContext): Promise<BriskOrmOperationResult>;
+    updateByPrimaryKey(_value: K, ctx?: BriskOrmContext): Promise<BriskOrmOperationResult>;
+    updateQuery(_value: K, query: BriskOrmQuery<K>, ctx?: BriskOrmContext): Promise<BriskOrmOperationResult>;
+    updateEveryEq(_value: K, queryEntity: Partial<K>, ctx?: BriskOrmContext): Promise<BriskOrmOperationResult>;
+    updateSomeEq(_value: K, queryEntity: Partial<K>, ctx?: BriskOrmContext): Promise<BriskOrmOperationResult>;
+    deleteByPrimaryKey(primaryKey: any, ctx?: BriskOrmContext): Promise<BriskOrmOperationResult>;
+    deleteQuery(query: BriskOrmQuery<K>, ctx?: BriskOrmContext): Promise<BriskOrmOperationResult>;
+    deleteEveryEq(queryEntity: Partial<K>, ctx?: BriskOrmContext): Promise<BriskOrmOperationResult>;
+    deleteSomeEq(queryEntity: Partial<K>, ctx?: BriskOrmContext): Promise<BriskOrmOperationResult>;
+    /**
+     * @deprecated
+     */
+    findList(ctx?: BriskOrmContext): Promise<K[] | undefined>;
+    /**
+     * @deprecated
+     */
+    findListBy(_key: string, _value: any, ctx?: BriskOrmContext): Promise<K[] | undefined>;
+    /**
+     * @deprecated
+     */
+    findBy(_key: string, _value: any, ctx?: BriskOrmContext): Promise<K | undefined>;
+}
 ```
 
 
