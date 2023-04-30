@@ -391,6 +391,7 @@ class BriskOrmQuery<T> {
     isNotNull(key: keyof T): BriskOrmQuery<T>;
     in(key: keyof T, value: any[]): BriskOrmQuery<T>;
     notIn(key: keyof T, value: any[]): BriskOrmQuery<T>;
+    includes(key: keyof T, value: any): BriskOrmQuery<T>;
     nested(sub: BriskOrmSubConditionFactor<T>): BriskOrmQuery<T>;
     or(sub?: BriskOrmSubConditionFactor<T>): BriskOrmQuery<T>;
     and(sub?: BriskOrmSubConditionFactor<T>): BriskOrmQuery<T>;
