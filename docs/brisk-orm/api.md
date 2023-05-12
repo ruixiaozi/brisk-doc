@@ -1,6 +1,8 @@
 # API
 
-## 1. connect
+## 基础API
+
+### 1. connect
 
 连接数据库，方法签名：
 
@@ -34,7 +36,7 @@ database: 'xxxx'
 })
 ```
 
-## 2. distory
+### 2. distory
 
 断开连接，方法签名：
 
@@ -51,7 +53,7 @@ await BriskOrm.distory();
 ```
 
 
-## 3. getSelect
+### 3. getSelect
 
 获取一个查询方法，用于执行查询语句，方法签名：
 
@@ -122,7 +124,7 @@ const selectFunc = BriskOrm.getSelect<T1[] | undefined>('select * from test', T1
 const res = await selectFunc();
 ```
 
-## 4. getInsert
+### 4. getInsert
 
 获取一个插入方法，用于执行插入语句，方法签名：
 
@@ -180,7 +182,7 @@ const res = await insertMany([
 ]);
 ```
 
-## 5. getUpdate
+### 5. getUpdate
 
 获取一个更新方法，用于执行更新语句，方法签名：
 
@@ -224,7 +226,7 @@ const res = await update({
 });
 ```
 
-## 6. getDelete
+### 6. getDelete
 
 获取一个删除方法，用于执行删除语句，方法签名：
 
@@ -259,7 +261,7 @@ const deleteFunc = BriskOrm.getDelete('delete from test where name = ?');
 const res = await deleteFunc('11');
 ```
 
-## 7. startTransaction
+### 7. startTransaction
 
 开启手动事务方法，返回一个上下文对象，可通过该对象进行事务控制，方法签名：
 
@@ -314,7 +316,7 @@ try {
 }
 ```
 
-## 8. transaction
+### 8. transaction
 
 开启自动事务，方法签名：
 
@@ -343,4 +345,154 @@ await transaction(async(ctx) => {
   const deleteFunc = getDelete('delete from test where name = ?');
   const res = await deleteFunc('2', ctx);
 }, 'test');
+```
+
+## 表结构API
+
+### 1. createTable
+
+创建表，方法签名：
+
+```ts
+/**
+ * 创建表
+ * @param name 表名
+ * @param table 表对象
+ * @param ctx orm上下文
+ * @returns
+ */
+function createTable(name: string, table: BriskOrmTable, ctx?: BriskOrmContext): Promise<any>;
+
+export interface BriskOrmTable {
+  charset: string;
+  collate: string;
+  engine: 'InnoDB';
+  columns: BriskOrmColumn[];
+  primaryKeys: string[];
+  // 子对象的key和父对象key一样，name为column名称
+  uniqueKeys: { [key: string]: BriskOrmUniqueKey };
+  // name为列名
+  foreignKeys: { [name: string]: BirskOrmForeignKey };
+}
+
+// key为唯一键名称，name为列名
+export type BriskOrmUniqueKey = { key: string, name: string }[];
+
+export interface BirskOrmForeignKey {
+  targetTableName: string;
+  targetColumnName: string;
+  action: BRISK_ORM_FOREIGN_ACTION_E;
+}
+
+export enum BRISK_ORM_FOREIGN_ACTION_E {
+  // 默认，级联动作
+  CASCADE='CASCADE',
+  // 设置为空
+  SET_NULL='SET NULL',
+  // 无动作
+  NO_ACTION='NO ACTION'
+}
+
+export interface BriskOrmColumn {
+  name: string;
+  type: BRISK_ORM_TYPE_E;
+  length?: number;
+  precision?: number;
+  notNull?: boolean;
+  autoIncrement?: boolean;
+  default?: any;
+}
+
+export enum BRISK_ORM_TYPE_E {
+  INT='int',
+  DOUBLE='double',
+  FLOAT='float',
+  VARCHAR='varchar',
+  TEXT='text',
+  JSON='json',
+  DATETIME='datetime',
+  DATE='date',
+  TIME='time',
+  TINYINT='tinyint'
+}
+```
+
+### 2. getAllTable
+
+获取所有表名列表，方法签名：
+
+```ts
+/**
+ * 获取所有表名列表
+ * @param ctx orm上下文
+ * @returns
+ */
+export async function getAllTable(ctx?: BriskOrmContext): Promise<string[]>;
+```
+
+### 3. deleteTable
+
+删除表，方法签名：
+
+```ts
+/**
+ * 删除表
+ * @param name 表名
+ * @param ctx orm上下文
+ * @returns
+ */
+export async function deleteTable(name: string, ctx?: BriskOrmContext): Promise<any>;
+```
+
+### 4. getCreateTableSQL
+
+获取表的原创建SQL，方法签名：
+
+```ts
+/**
+ * 获取表的原创建SQL
+ * @param name 表名
+ * @param ctx orm上下文
+ * @returns
+ */
+export async function getCreateTableSQL(name: string, ctx?: BriskOrmContext): Promise<any>;
+```
+
+### 5. updateTable
+
+更新表，方法签名：
+
+```ts
+/**
+ * 更新表
+ * @param name 表名
+ * @param table 表对象
+ * @param ctx orm上下文
+ * @returns
+ */
+export async function updateTable(name: string, table: BriskOrmTable, ctx?: BriskOrmContext): Promise<any>;
+```
+
+### 6. autoSync
+
+自动同步表，需要配合 装饰器/addTable 使用，方法签名：
+
+```ts
+/**
+ * 自动同步表
+ */
+export async function autoSync(): Promise<any>;
+```
+
+### 7. addTable
+
+添加表对象到列表中，用于 autoSync 自动同步表，方法签名：
+
+```ts
+/**
+ * 添加表对象到列表中
+ * @param name 表名
+ * @param table 表对象
+ */
+export function addTable(name: string, table: BriskOrmTable): Promise<any>;
 ```

@@ -166,10 +166,10 @@ export function Transaction(): Function;
 ```ts
 @Table('test')
 class Test9Entity {
-  @PrimaryKey('name')
+  @PrimaryKey({ dbName: 'name' })
   myName?: string;
 
-  @Column('age')
+  @Column({ dbName: 'age' })
   myAge?: number;
 }
 
@@ -201,9 +201,16 @@ class TestService9 {
 /**
  * 数据表装饰器
  * @param dbTableName 表名
+ * @param options 选项
  * @returns
  */
-function Table(dbTableName: string): Function
+function Table(dbTableName: string, options?: BriskOrmTableOption): Function
+
+export interface BriskOrmTableOption {
+  charset?: string;
+  collate?: string;
+  engine?: 'InnoDB';
+}
 ```
 
 
@@ -223,10 +230,32 @@ class Info {
 ```ts
 /**
  * 数据表的主键装饰器
- * @param dbName 数据库列名，默认使用属性名
+ * @param options 选项
  * @returns
  */
-function PrimaryKey(dbName?: string): Function
+function PrimaryKey(options?: BriskOrmPrimaryKeyOption): Function
+
+export enum BRISK_ORM_TYPE_E {
+  INT='int',
+  DOUBLE='double',
+  FLOAT='float',
+  VARCHAR='varchar',
+  TEXT='text',
+  JSON='json',
+  DATETIME='datetime',
+  DATE='date',
+  TIME='time',
+  TINYINT='tinyint'
+}
+
+export interface BriskOrmPrimaryKeyOption {
+  dbName?: string;
+  type?: BRISK_ORM_TYPE_E;
+  length?: number;
+  precision?: number;
+  autoIncrement?: boolean;
+  default?: any;
+}
 ```
 
 
@@ -235,22 +264,99 @@ function PrimaryKey(dbName?: string): Function
 ```ts
 @Table('test')
 class Info {
-  @PrimaryKey('name')
+  @PrimaryKey({ dbName: 'name' })
   myName?: string;
 }
 ```
 
-### 3. Column 
+
+### 3. ForeignKey
+
+属性装饰器，用于将一个类属性声明为一个数据表的外键（当前类需要使用Table装饰器声明），装饰器签名：
+
+```ts
+/**
+ * 数据表的外键装饰器
+ * @param Target 引用类（需要被Table修饰）
+ * @param targetPropertyName 目标类属性名称
+ * @param options 选项
+ * @returns 
+ */
+function ForeignKey<T>(Target: Class<T>, targetPropertyName: keyof T, options?: BriskOrmForeignKeyOption): Function
+
+export interface BriskOrmForeignKeyOption {
+  dbName?: string;
+  type?: BRISK_ORM_TYPE_E;
+  length?: number;
+  precision?: number;
+  autoIncrement?: boolean;
+  default?: any;
+  // 默认为CASCADE
+  action?: BRISK_ORM_FOREIGN_ACTION_E;
+}
+
+export enum BRISK_ORM_FOREIGN_ACTION_E {
+  // 默认，级联动作
+  CASCADE='CASCADE',
+  // 设置为空
+  SET_NULL='SET NULL',
+  // 无动作
+  NO_ACTION='NO ACTION'
+}
+```
+
+
+案例：声明一个外键
+
+```ts
+@Table('test')
+class Info {
+  @PrimaryKey({ dbName: 'name' })
+  myName?: string;
+}
+
+@Table('test2')
+class Info2 {
+  @ForeignKey(Info, 'myName', 'myName')
+  myName?: string;
+}
+```
+
+### 4. Column 
 
 属性装饰器，用于将一个类属性声明为一个数据表的列（当前类需要使用Table装饰器声明），装饰器签名：
 
 ```ts
 /**
  * 数据表的列装饰器
- * @param dbName 数据表的列名，默认使用属性名
+ * @package options 选项
  * @returns
  */
-function Column(dbName?: string): Function
+function Column(options?: BriskOrmColumnOption): Function
+
+export interface BriskOrmColumnOption {
+  dbName?: string;
+  type?: BRISK_ORM_TYPE_E;
+  length?: number;
+  precision?: number;
+  autoIncrement?: boolean;
+  default?: any;
+  // 所属key名称
+  uniqueKey?: string;
+  // 是否为主键
+  isPrimaryKey?: boolean;
+  // 为外键
+  foreignKey?: {
+    // 目标类
+    Target: Class,
+    // 目标类字段名称
+    targetPropertyName: string,
+    // 默认为CASCADE
+    action?: BRISK_ORM_FOREIGN_ACTION_E;
+  };
+}
+
+
 ```
 
 
@@ -259,27 +365,27 @@ function Column(dbName?: string): Function
 ```ts
 @Table('test')
 class Info {
-  @PrimaryKey('name')
+  @PrimaryKey({ dbName: 'name' })
   myName?: string;
 
-  @Column('age')
+  @Column({ dbName: 'age' })
   myAge?: number;
 }
 ```
 
-### 4. Many
+### 5. Many
 
 属性装饰器，用于将一个类属性声明为一对多映射（当前类需要使用Table装饰器声明），装饰器签名：
 
 ```ts
 /**
- * 一对多关系 装饰器
- * @param Entity 一对多对应的实体类（必须有对应的Dao装饰器类）
- * @param foreignKey 当前表的外键的列名
+ * 一对多关系，仅对象类使用，不映射数据库
+ * @param Entity 一对多对应的实体（必须有对应的Dao装饰器类）
+ * @param sourceDbName 当前表的外键的列名
  * @param targetDbName 目标表存储当前表外键的列名
  * @returns
  */
-function Many(Entity: Class, foreignKey: string, targetDbName: string): Function
+export function Many(Entity: Class, sourceDbName: string, targetDbName: string): Function
 ```
 
 
@@ -288,19 +394,19 @@ function Many(Entity: Class, foreignKey: string, targetDbName: string): Function
 ```ts
 @Table('test')
 class Info {
-  @PrimaryKey('name')
+  @PrimaryKey({ dbName: 'name' })
   myName?: string;
 
-  @Column('age')
+  @Column({ dbName: 'age' })
   myAge?: number;
 }
 
 @Table('test1')
 class Info2 {
-  @PrimaryKey('name')
+  @PrimaryKey({ dbName: 'name' })
   myName?: string;
 
-  @Column('value')
+  @Column({ dbName: 'value' })
   myValue?: number;
 
   @Many(Info, 'name', 'name')
@@ -308,19 +414,19 @@ class Info2 {
 }
 ```
 
-### 5. One
+### 6. One
 
 属性装饰器，用于将一个类属性声明为一对一或者多对一映射（当前类需要使用Table装饰器声明），装饰器签名：
 
 ```ts
 /**
- * 一对一，多对一关系 装饰器
- * @param Entity 一对一，多对一对应的实体（必须有Dao类）
- * @param foreignKey 当前表的外键的列名
+ * 一对一，多对一关系
+ * @param Entity 一对一，多对一对应的实体（必须有对应的Dao装饰器类）
+ * @param sourceDbName 当前表的外键的列名
  * @param targetDbName 目标表存储当前表外键的列名
  * @returns
  */
-function One(Entity: Class, foreignKey: string, targetDbName: string): Function
+export function One(Entity: Class, sourceDbName: string, targetDbName: string): Function
 ```
 
 
@@ -329,19 +435,19 @@ function One(Entity: Class, foreignKey: string, targetDbName: string): Function
 ```ts
 @Table('test')
 class Info {
-  @PrimaryKey('name')
+  @PrimaryKey({ dbName: 'name' })
   myName?: string;
 
-  @Column('age')
+  @Column({ dbName: 'age' })
   myAge?: number;
 }
 
 @Table('test1')
 class Info2 {
-  @PrimaryKey('name')
+  @PrimaryKey({ dbName: 'name' })
   myName?: string;
 
-  @Column('value')
+  @Column({ dbName: 'value' })
   myValue?: number;
 
   @One(Info, 'name', 'name')
@@ -349,7 +455,7 @@ class Info2 {
 }
 ```
 
-### 6. Dao
+### 7. Dao
 
 类装饰器，用于将一个类声明为Dao类，该类继承BriskOrmDao\<T\>，框架已经实现了部分常用的ORM操作。装饰器签名：
 
@@ -451,10 +557,10 @@ class BriskOrmDao<K> {
 ```ts
 @Table('test')
 class Info {
-  @PrimaryKey('name')
+  @PrimaryKey({ dbName: 'name' })
   myName?: string;
 
-  @Column('age')
+  @Column({ dbName: 'age' })
   myAge?: number;
 }
 
