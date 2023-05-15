@@ -27,17 +27,17 @@ BriskORM 是一个基于nodejs的快速，轻量级，轻快的ORM，支持mysql
 
 3. 使用
 
-    entity/TestEntity.ts:
+    entity/TestPo.ts:
 
     ```ts
     import { Column, PrimaryKey, Table } from "brisk-orm";
 
     @Table('test')
-    export class TestEntity {
-      @PrimaryKey('name')
+    export class TestPo {
+      @PrimaryKey({ dbName: 'name' })
       myName?: string;
 
-      @Column('age')
+      @Column({ dbName: 'age' })
       myAge?: number;
     }
     ```
@@ -46,10 +46,10 @@ BriskORM 是一个基于nodejs的快速，轻量级，轻快的ORM，支持mysql
 
     ```ts
     import { BriskOrmDao, Dao } from "brisk-orm";
-    import { TestEntity } from "../entity/TestEntity";
+    import { TestPo } from "../entity/TestPo";
 
-    @Dao(TestEntity)
-    export class TestDao extends BriskOrmDao<TestEntity> {
+    @Dao(TestPo)
+    export class TestDao extends BriskOrmDao<TestPo> {
 
     }
     ```
@@ -67,41 +67,9 @@ BriskORM 是一个基于nodejs的快速，轻量级，轻快的ORM，支持mysql
       testDao?: TestDao;
 
       getAll() {
-        return this.testDao?.findList();
+        return this.testDao?.list();
       }
     }
     ```
 
-    db-config.ts:
-
-    ```ts
-    export const dbConfig = {
-      host: 'xxxxxx',
-      user: 'xxxxxx',
-      password: 'xxxxxxx',
-      database: 'xxxxx'
-    }
-    ```
-
-    index.ts:
-
-    ```ts
-    import BriskIoC from 'brisk-ioc';
-    import BriskOrm from 'brisk-orm';
-    import path from 'path';
-    // 需要自己配置
-    import { dbConfig } from './db-config';
-    import { TestService } from './service/TestService';
-
-    (async function() {
-      BriskOrm.connect(dbConfig);
-      BriskIoC.configure({
-        beanPathes: [path.join(__dirname, './dao'), path.join(__dirname, './service')]
-      });
-      await BriskIoC.scanBean();
-      const res = await BriskIoC.getBean(TestService)?.getAll();
-      console.log(res);
-      await BriskOrm.distory();
-    })();
-    ```
     

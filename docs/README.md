@@ -1,14 +1,25 @@
 ---
 home: true
+title: 首页
 heroImage: /img/logo.svg
-heroText: Brisk
-tagline: Brisk系列：基于nodejs的系列库
+tagline: 集ts扩展、日志、IOC、应用服务器、数据库ORM等部件的框架
+actions:
+  - text: 快速上手
+    link: /guide
+    type: primary
 features:
-  - title: 强大的API
-    details: 提供了功能强大、丰富的API方法，能够轻松实现国际化处理、数据转换和弹出层。
-  - title: 丰富的组件
-    details: 从基础组件到表单、表格组件，覆盖网页设计的所有基本要素。
-  - title: 便捷的指令
-    details: 提供指令形式实现溢出处理等，使用更加便捷。
-footer: MIT Licensed | Copyright © ruixiaozi | Theme is vuepress
+  - title: brisk-ts-extends
+    details: typescript扩展：实现运行时类型，装饰器工厂等
+  - title: brisk-log
+    details: 日志库，实现多级别、多类型、多配置的日志功能
+  - title: brisk-ioc
+    details: 基于brisk-ts-extends实现的IoC容器
+  - title: brisk-controller
+    details: 基于koa实现装饰器模式的应用服务器框架
+  - title: brisk-orm
+    details: 基于mysql实现装饰器模型的ORM框架
+  - title: eslint-config-brisk
+    details: 通用严格的eslint规范
+footer: MIT Licensed | Copyright © <a href="https://www.ruixiaozi.com/" target="_">ruixiaozi</a> | Theme is vuepress | 备案号：<a href="https://beian.miit.gov.cn/" target="_">渝ICP备15006053号-4</a>
+footerHtml: true
 ---
