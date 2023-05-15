@@ -21,6 +21,12 @@ module.exports = {
           { text: 'eslint-config-brisk', link: '/eslint-config-brisk/' },
         ]
       },
+      {
+        text: '0.0.3',
+        children: [
+
+        ]
+      },
       { text: 'GitHub', link: 'https://github.com/ruixiaozi', target: '_blank' },
       { text: 'Ruixiaozi', link: 'https://www.ruixiaozi.com', target: '_blank' },
     ],
