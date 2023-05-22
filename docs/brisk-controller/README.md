@@ -60,17 +60,11 @@ BriskController 一个基于Koa的快速、轻量级、轻快的Controller，可
     index.ts:
 
     ```ts
-    import BriskIoC from 'brisk-ioc';
-	import BriskController from 'brisk-controller';
-	import path from 'path';
-	
-	(async function() {;
-	  BriskIoC.configure({
-	    beanPathes: [path.join(__dirname, './controller')]
-	  });
-	  await BriskIoC.scanBean();
-	  const app = await BriskController.start(3000, {
-	    swagger: true,
-	  });
-	})();
+    import BriskController from 'brisk-controller';
+
+    import './controller';
+    
+    (async function() {;
+      const app = await BriskController.start(3000);
+    })();
     ```

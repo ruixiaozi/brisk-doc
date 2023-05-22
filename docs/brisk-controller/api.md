@@ -296,25 +296,42 @@ const app = await BriskController.start();
 
 ## 7. throwError
 
+已弃用，使用 `BriskControllerError` 异常类处理
+
 抛出异常响应（可用于addRequest或者addInterceptor中的handler方法内），并终止方法执行，立即响应请求，方法签名：
 
 ```ts
 /**
  * 抛出错误响应
+ * @deprecated
+ * @link BriskControllerError 可以抛出BriskControllerError异常代替此方法
  * @param status 状态码
  * @param msg 错误内容
  */
 export function throwError(status: number, msg?: any): void;
+
+export declare class BriskControllerError extends Error {
+    status: number;
+    text?: string | any;
+    headers?: BriskControllerHeaders;
+    constructor(_status: number, headers: BriskControllerHeaders, _text?: string);
+    constructor(_status?: number, _text?: string);
+    
+    // 0.0.4 加入
+    setBody(body: any): void;
+}
 ```
 
 案例：校验参数，返回400错误
 
 ```ts
-import BriskController from 'brisk-controller';
+import BriskController, { BriskControllerError } from 'brisk-controller';
 
 BriskController.addRequest('/test1', (a: number, b: boolean) => {
   if (a !== 1) {
-    throwError(400, 'param a is error');
+    // 已弃用：throwError(400, 'param a is error');
+    // 抛出控制层异常
+    throw new BriskControllerError(400, 'param a is error');
   }
   return {
 	msg: 'test1'
@@ -338,4 +355,27 @@ BriskController.addRequest('/test1', (a: number, b: boolean) => {
 const app = await BriskController.start();
 // 访问 http://localhost:3000/test1?a=2&b=true
 // 返回： 400 -> param a is error
+```
+
+## 8. resultFactory
+
+
+返回结果工厂，通过返回结果工厂的toResult()返回的对象，可以用作addRequest的handler的返回值。主要场景为设置响应头和cookie。方法签名：
+
+```ts
+/**
+ * 返回结果工厂
+ * @param result 返回对象
+ * @returns 返回一个工厂对象
+ */
+export declare function resultFactory<T>(result: T): BriskControllerResultFactory<T>;
+
+export interface BriskControllerResultFactory<T> {
+  setCookie(key: string, value: string, option?: BriskControllerCookieOption): BriskControllerResultFactory<T>;
+
+  setHeader(key: string, value: string): BriskControllerResultFactory<T>;
+
+  toResult(): T;
+}
+
 ```

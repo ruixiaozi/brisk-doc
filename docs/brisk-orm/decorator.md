@@ -245,7 +245,9 @@ export enum BRISK_ORM_TYPE_E {
   DATETIME='datetime',
   DATE='date',
   TIME='time',
-  TINYINT='tinyint'
+  TINYINT='tinyint',
+  // 0.0.4 加入
+  GEOMETRY='geometry'
 }
 
 export interface BriskOrmPrimaryKeyOption {
@@ -291,6 +293,8 @@ export interface BriskOrmForeignKeyOption {
   precision?: number;
   autoIncrement?: boolean;
   default?: any;
+  // 所属key名称
+  uniqueKey?: string;
   // 默认为CASCADE
   action?: BRISK_ORM_FOREIGN_ACTION_E;
 }
@@ -510,24 +514,33 @@ class BriskOrmQuery<T> {
 }
 
 class BriskOrmDao<K> {
+    // 计数
     count(ctx?: BriskOrmContext): Promise<number | undefined>;
     countQuery(query: BriskOrmQuery<K>, ctx?: BriskOrmContext): Promise<number | undefined>;
     countEveryEq(queryEntity: Partial<K>, ctx?: BriskOrmContext): Promise<number | undefined>;
     countSomeEq(queryEntity: Partial<K>, ctx?: BriskOrmContext): Promise<number | undefined>;
+    // 列表
     list(ctx?: BriskOrmContext): Promise<K[] | undefined>;
     listQuery(query: BriskOrmQuery<K>, ctx?: BriskOrmContext): Promise<K[] | undefined>;
     listEveryEq(queryEntity: Partial<K>, ctx?: BriskOrmContext): Promise<K[] | undefined>;
     listSomeEq(queryEntity: Partial<K>, ctx?: BriskOrmContext): Promise<K[] | undefined>;
+    // 分页
     page(page: BriskOrmPage, ctx?: BriskOrmContext): Promise<K[] | undefined>;
     pageQuery(query: BriskOrmQuery<K>, page: BriskOrmPage, ctx?: BriskOrmContext): Promise<K[] | undefined>;
     pageEveryEq(queryEntity: Partial<K>, page: BriskOrmPage, ctx?: BriskOrmContext): Promise<K[] | undefined>;
     pageSomeEq(queryEntity: Partial<K>, page: BriskOrmPage, ctx?: BriskOrmContext): Promise<K[] | undefined>;
+    // 查找
     findByPrimaryKey(_value: any, ctx?: BriskOrmContext): Promise<K | undefined>;
     findQuery(query: BriskOrmQuery<K>, ctx?: BriskOrmContext): Promise<K | undefined>;
     findEveryEq(queryEntity: Partial<K>, ctx?: BriskOrmContext): Promise<K | undefined>;
     findSomeEq(queryEntity: Partial<K>, ctx?: BriskOrmContext): Promise<K | undefined>;
+    // 保存
     save(_value: K, ctx?: BriskOrmContext): Promise<BriskOrmOperationResult>;
     saveAll(_value: K[], ctx?: BriskOrmContext): Promise<BriskOrmOperationResult>;
+    // 保存或者更新
+    saveOrUpdate(_value: K, ctx?: BriskOrmContext): Promise<BriskOrmOperationResult>;
+    saveOrUpdateAll(_value: K[], ctx?: BriskOrmContext): Promise<BriskOrmOperationResult>;
+    // 更新
     updateByPrimaryKey(_value: K, ctx?: BriskOrmContext): Promise<BriskOrmOperationResult>;
     updateQuery(_value: K, query: BriskOrmQuery<K>, ctx?: BriskOrmContext): Promise<BriskOrmOperationResult>;
     updateEveryEq(_value: K, queryEntity: Partial<K>, ctx?: BriskOrmContext): Promise<BriskOrmOperationResult>;

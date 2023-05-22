@@ -98,7 +98,12 @@ interface BriskOrmResultOption {
   // 映射关系，key为类字段，value为数据库字段
   mapping?: BriskOrmEntityMapping;
   // 默认false
+  /**
+   * @deprecated 使用aggregation
+   */
   isCount?: boolean;
+  // 0.0.4 加入
+  aggregation?: boolean;
 }
 
 // 如果开启事务，args最后一个参数需要传入ctx上下文
@@ -413,7 +418,9 @@ export enum BRISK_ORM_TYPE_E {
   DATETIME='datetime',
   DATE='date',
   TIME='time',
-  TINYINT='tinyint'
+  TINYINT='tinyint',
+  // 0.0.4 加入
+  GEOMETRY='geometry'
 }
 ```
 

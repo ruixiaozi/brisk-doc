@@ -22,7 +22,7 @@ module.exports = {
         ]
       },
       {
-        text: '0.0.3',
+        text: '0.x.x',
         children: [
 
         ]
@@ -61,6 +61,7 @@ module.exports = {
         '/brisk-orm/README.md',
         '/brisk-orm/decorator.md',
         '/brisk-orm/api.md',
+        '/brisk-orm/innerclass.md',
       ],
       '/brisk-controller/': [
         '/brisk-controller/README.md',
