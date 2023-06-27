@@ -1,6 +1,6 @@
 {
   "name": "brisk-doc",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "brisk doc",
   "scripts": {
     "docs:dev": "vuepress-webpack dev docs",

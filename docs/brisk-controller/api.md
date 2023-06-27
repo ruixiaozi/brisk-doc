@@ -97,7 +97,7 @@ export interface BriskControllerParameter {
 
 export interface BriskControllerInterceptorOption {
   // 默认为GET
-  method?: BRISK_CONTROLLER_METHOD_E;
+  method?: BRISK_CONTROLLER_METHOD_E | BRISK_CONTROLLER_METHOD_E[];
   // 基础地址，默认相对于globalBaseUrl的根路径
   baseUrl?: string;
 }
