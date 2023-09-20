@@ -487,8 +487,11 @@ export async function updateTable(name: string, table: BriskOrmTable, ctx?: Bris
 ```ts
 /**
  * 自动同步表
+ * @param expectTables 指定要排除同步的表名
+ * @param disableDeleteTable 禁用删除多余表，默认开启
+ * @param disableUpdateTable 禁用更新表，默认开启
  */
-export async function autoSync(): Promise<any>;
+export async function autoSync(expectTables: string[] = [], disableDeleteTable = true, disableUpdateTable = true): Promise<any>;
 ```
 
 ### 7. addTable
@@ -503,3 +506,28 @@ export async function autoSync(): Promise<any>;
  */
 export function addTable(name: string, table: BriskOrmTable): Promise<any>;
 ```
+
+### 8. setGlobalAutoSyncExpect
+
+*设置全局排除表*，在排除表内的table在autoSync时，将跳过
+
+```ts
+/**
+ * 设置全局排除表
+ * @param expectTables 指定要排除同步的表名列表
+ */
+export function setGlobalAutoSyncExpect(expectTables: string[]): void;
+```
+
+### 9. addGlobalAutoSyncExpect
+
+添加全局排除表，在排除表内的table在autoSync时，将跳过
+
+```ts
+/**
+ * 添加全局排除表
+ * @param expectTables 指定要排除同步的表名列表
+ */
+export function addGlobalAutoSyncExpect(expectTables: string[]): void;
+```
+

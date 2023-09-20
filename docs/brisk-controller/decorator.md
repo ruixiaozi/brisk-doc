@@ -355,7 +355,87 @@ class TestDecorator1 {
 
 ## 10. InFile
 
-TODO
+参数装饰器（仅用于被RequestMapping装饰器装饰的方法参数），将对应参数与请求体为文件中的某个字段进行值映射，装饰器签名：
+
+```ts
+/**
+ * InFile参数 装饰器
+ * @param {option} BriskControllerDecoratorParam 选项
+ * @returns
+ */
+export function InFile(option?: BriskControllerDecoratorParam): Function
+```
+
+选项结构：同 Body 装饰器
+
+案例：上传图片
+
+```ts
+import { Controller, RequestMapping, InFile, BRISK_CONTROLLER_METHOD_E, BriskControllerError } from 'brisk-controller';
+
+@Controller('/test', { tag: { name: 'test1' } })
+class TestDecorator1 {
+  test1Data = 'test1';
+
+  @RequestMapping('/image', {
+    title: '上传图片',
+    description: '上传图片',
+    method: BRISK_CONTROLLER_METHOD_E.POST,
+  })
+  async image(@InFile() files: BriskControllerFile[]): Promise<string[]> {
+    try {
+      const urls: string[] = [];
+      console.log(files);
+      for (const file of files) {
+        const filenameSplit = file.originalFilename?.split('.') || [];
+        const suffix = filenameSplit.length >= 2 ? `.${filenameSplit[filenameSplit.length - 1]}` : '';
+        const relativePublic = path.posix.join('/upload', `${this.snowflakeService.generateId()}${suffix}`);
+        const url = path.posix.join(process.env.BASE_URL!, relativePublic);
+        await fs.promises.copyFile(file.filepath, path.join(process.env.RESOURCE_PATH!, '/public', relativePublic));
+        await fs.promises.unlink(file.filepath);
+        urls.push(url);
+      }
+      return urls;
+    } catch (error) {
+      this.logger.error('上传图片失败', error);
+      const err = new BriskControllerError(500);
+      throw err;
+    }
+  }
+}
+```
+
+
+
+注意：必须使用 `BriskControllerFile[] ` 或者 `BriskControllerFileArray` 类型接收 `@InFile` 装饰器的参数。类型结构如下：
+
+```ts
+export interface BriskControllerFile {
+
+   size: number;
+
+   filepath: string;
+
+   originalFilename?: string;
+
+   newFilename: string;
+
+   mimetype?: string;
+
+   mtime?: Date | null | undefined;
+
+   hashAlgorithm?: false | 'sha1' | 'md5' | 'sha256';
+
+   hash?: string | null;
+
+   toString(): string;
+}
+
+export class BriskControllerFileArray extends Array<BriskControllerFile> {
+
+}
+
+```
 
 ## 11. Interceptor
 
