@@ -519,3 +519,30 @@ class TestDecorator1 {
   }
 }
 ```
+
+## 13. BeforeControllerStart
+
+方法装饰器，被装饰的方法将被添加前置钩子，装饰器签名：
+
+```ts
+/**
+ * 控制层启动前
+ * @param priority 优先级，默认10
+ * @returns
+ */
+export function BeforeControllerStart(priority: number = 10): Function;
+```
+
+## 14. AfterControllerStart
+
+方法装饰器，被装饰的方法将被添加后置钩子，装饰器签名：
+
+```ts
+/**
+ * 控制层启动后
+ * @param priority 优先级，默认10
+ * @returns
+ */
+export function AfterControllerStart(priority: number = 10): Function;
+```
+

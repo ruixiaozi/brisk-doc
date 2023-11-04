@@ -189,6 +189,36 @@ class TestService9 {
 }
 ```
 
+### 6. BeforeOrmConn
+
+方法装饰器，添加数据库连接前钩子，装饰器签名：
+
+```ts
+/**
+ * 数据库连接前
+ * @param priority 优先级，默认10
+ * @returns
+ */
+export function BeforeOrmConn(priority: number = 10): Function;
+```
+
+### 7. AfterOrmConn
+
+方法装饰器，添加数据库连接后置钩子，装饰器签名：
+
+```ts
+/**
+ * 数据库连接后
+ * @param priority 优先级，默认10
+ * @returns
+ */
+export function AfterOrmConn(priority: number = 10): Function;
+```
+
+
+
+
+
 ## 操作装饰器
 
 操作装饰器将自动创建基础的数据表操作映射，包括表结构映射、基础的增删改查操作映射。
@@ -210,6 +240,8 @@ export interface BriskOrmTableOption {
   charset?: string;
   collate?: string;
   engine?: 'InnoDB';
+  // 是否开启软删除，软删除的删除将变成更新、更新查找只找未删除的
+  softDelete?: boolean;
 }
 ```
 
@@ -344,9 +376,10 @@ export interface BriskOrmColumnOption {
   length?: number;
   precision?: number;
   autoIncrement?: boolean;
+  // 初始默认值和软删除恢复时的值
   default?: any;
-  // 所属key名称
-  uniqueKey?: string;
+  // 所属key名称，可以是数组，构造多唯一键
+  uniqueKey?: string | string[];
   // 是否为主键
   isPrimaryKey?: boolean;
   // 为外键
@@ -358,6 +391,8 @@ export interface BriskOrmColumnOption {
     // 默认为CASCADE
     action?: BRISK_ORM_FOREIGN_ACTION_E;
   };
+  // 开启软删除后，删除变成更新，更新后的值，可以是固定值，也可以是方法
+  deleteValue?: any | (() => any);
 }
 
 
@@ -506,10 +541,13 @@ class BriskOrmQuery<T> {
     or(sub?: BriskOrmSubConditionFactor<T>): BriskOrmQuery<T>;
     and(sub?: BriskOrmSubConditionFactor<T>): BriskOrmQuery<T>;
     everyEq(entity: Partial<T>): BriskOrmQuery<T>;
+    everyEqOrLike(entity: Partial<T>): BriskOrmQuery<T>;
     someEq(entity: Partial<T>): BriskOrmQuery<T>;
     groupBy(...keys: (keyof T)[]): BriskOrmQuery<T>;
     orderBy(direction: BRISK_ORM_ORDER_BY_E, ...keys: (keyof T)[]): BriskOrmQuery<T>;
-    toSqlString(mapping: BriskOrmEntityMapping): string;
+    withDel(): BriskOrmQuery<T>;
+    onlyDel(): BriskOrmQuery<T>;
+    toSqlString(mapping: BriskOrmEntityMapping, softDelete = false): string;
     toWhereSqlString(mapping: BriskOrmEntityMapping): string;
 }
 
@@ -538,7 +576,13 @@ class BriskOrmDao<K> {
     save(_value: K, ctx?: BriskOrmContext): Promise<BriskOrmOperationResult>;
     saveAll(_value: K[], ctx?: BriskOrmContext): Promise<BriskOrmOperationResult>;
     // 保存或者更新
+    /**
+   * @deprecated 更新将导致关联表数据被删除
+   */
     saveOrUpdate(_value: K, ctx?: BriskOrmContext): Promise<BriskOrmOperationResult>;
+    /**
+   * @deprecated 更新将导致关联表数据被删除
+   */
     saveOrUpdateAll(_value: K[], ctx?: BriskOrmContext): Promise<BriskOrmOperationResult>;
     // 更新
     updateByPrimaryKey(_value: K, ctx?: BriskOrmContext): Promise<BriskOrmOperationResult>;

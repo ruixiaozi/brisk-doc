@@ -64,7 +64,7 @@ export function get(typeName: string): TypeDes;
 
 ## 4. getParentTypeKind
 
-获取父类型，用于泛型类型，例如：`Promise<string>` 的 TypeKind 为 `Promise:string` ，通过 `getParentTypeKind` 获取为 `Promise` ，方法签名：
+获取父类型，用于泛型类型，例如：`Promise<string>` 的 TypeKind 为 `Promise.string` ，通过 `getParentTypeKind` 获取为 `Promise` ，方法签名：
 
 ```ts
 /**
@@ -78,7 +78,7 @@ export function getParentTypeKind(kind: TypeKind | TypeKind[]): TypeKind | TypeK
 
 ## 5. getSubTypeKind
 
-获取子类型，用于泛型类型，例如：`Promise<string>` 的 TypeKind 为 `Promise:string` ，通过 `getSubTypeKind` 获取为 `string` ，方法签名：
+获取子类型，用于泛型类型，例如：`Promise<string>` 的 TypeKind 为 `Promise.string` ，通过 `getSubTypeKind` 获取为 `string` ，方法签名：
 
 ```ts
 /**

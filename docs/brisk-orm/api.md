@@ -20,6 +20,15 @@ user: string;
 password: string;
 database: string;
 charset?: string;
+// 是否开启数据库同步，默认只同步新增表
+autoSync: {
+  enable: boolean;
+  expectTables?: string[];
+  // 默认false。设置true开启删除多余表格
+  enableDeleteTable?: boolean;
+  // 默认false。设置true开启更新存在的表格
+  enableUpdateTable?: boolean;
+};
 }
 ```
 
@@ -32,7 +41,10 @@ BriskOrm.connect({
 host: 'xxx.xxx.xxx',
 user: 'xxxx',
 password: 'xxxxx',
-database: 'xxxx'
+database: 'xxxx',
+autoSync: {
+  enable: false,
+}
 })
 ```
 
@@ -138,9 +150,14 @@ const res = await selectFunc();
  * 获取一个insert方法，用于插入数据
  * @param sql sql语句
  * @param propertis 插入对象字段列表，需要按顺序
+ * @param Target 目标类
  * @returns insert方法
  */
-function getInsert<T>(sql: string, propertis: string[]): BriskOrmInsertFunction<T>;
+export function getInsert<T>(
+  sql: string,
+  propertis: string[],
+  Target?: Class,
+): BriskOrmInsertFunction<T>;
 ```
 
 选项结构：
@@ -198,13 +215,15 @@ const res = await insertMany([
  * @param propertis 修改对象的字段列表，需要按set顺序填写
  * @param mapping 映射对象
  * @param sqlArgs 作为原生SQL插入的参数序号
+ * @param Target 目标对象
  * @returns
  */
-function getUpdate<T>(
+export function getUpdate<T>(
   sql: string,
   propertis: string[],
   mapping?: BriskOrmEntityMapping,
   sqlArgs?: number[],
+  Target?: Class,
 ): BriskOrmUpdateFunction<T>;
 ```
 
@@ -241,12 +260,16 @@ const res = await update({
  * @param sql sql语句
  * @param mapping 映射对象
  * @param sqlArgs 作为原生SQL插入的参数序号
+ * @param Target 目标类
+ * @param id 删除方法的id
  * @returns
  */
-function getDelete(
+export function getDelete(
   sql: string,
   mapping?: BriskOrmEntityMapping,
   sqlArgs?: number[],
+  Target?: Class,
+  id?: string,
 ): BriskOrmDeleteFunction;
 ```
 
@@ -330,8 +353,13 @@ try {
  * 自动事务
  * @param handler 事务实际业务处理器
  * @param transactionName 事务名称，用于表示当前事务
+ * @param parentCtx 父级ctx，可以传递ctx
  */
-export async function transaction(handler: (ctx: BriskOrmContext) => any, transactionName: string): Promise<void>;
+export async function transaction<T>(
+  handler: (ctx: BriskOrmContext) => T,
+  transactionName: string,
+  parentCtx?: BriskOrmContext,
+): Promise<T>;
 ```
 
 案例：简单的自动事务
@@ -351,6 +379,24 @@ await transaction(async(ctx) => {
   const res = await deleteFunc('2', ctx);
 }, 'test');
 ```
+
+### 9. addHook
+
+添加书籍库链接的前置和后置钩子，方法签名：
+
+```ts
+// 添加钩子
+export function addHook(pos: 'before_conn' | 'after_conn', hook: BriskOrmHooks): void;
+
+export interface BriskOrmHooks {
+  priority: number;
+  handler: () => Promise<void> | void;
+}
+```
+
+
+
+
 
 ## 表结构API
 
@@ -480,21 +526,7 @@ export async function getCreateTableSQL(name: string, ctx?: BriskOrmContext): Pr
 export async function updateTable(name: string, table: BriskOrmTable, ctx?: BriskOrmContext): Promise<any>;
 ```
 
-### 6. autoSync
-
-自动同步表，需要配合 装饰器/addTable 使用，方法签名：
-
-```ts
-/**
- * 自动同步表
- * @param expectTables 指定要排除同步的表名
- * @param disableDeleteTable 禁用删除多余表，默认开启
- * @param disableUpdateTable 禁用更新表，默认开启
- */
-export async function autoSync(expectTables: string[] = [], disableDeleteTable = true, disableUpdateTable = true): Promise<any>;
-```
-
-### 7. addTable
+### 6. addTable
 
 添加表对象到列表中，用于 autoSync 自动同步表，方法签名：
 
@@ -507,7 +539,7 @@ export async function autoSync(expectTables: string[] = [], disableDeleteTable =
 export function addTable(name: string, table: BriskOrmTable): Promise<any>;
 ```
 
-### 8. setGlobalAutoSyncExpect
+### 7. setGlobalAutoSyncExpect
 
 *设置全局排除表*，在排除表内的table在autoSync时，将跳过
 
@@ -519,7 +551,7 @@ export function addTable(name: string, table: BriskOrmTable): Promise<any>;
 export function setGlobalAutoSyncExpect(expectTables: string[]): void;
 ```
 
-### 9. addGlobalAutoSyncExpect
+### 8. addGlobalAutoSyncExpect
 
 添加全局排除表，在排除表内的table在autoSync时，将跳过
 

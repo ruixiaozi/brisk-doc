@@ -115,7 +115,7 @@ export interface BriskControllerRedirectInfo {
 }
 
 export interface BriskControllerRequestOption extends BriskControllerInterceptorOption {
-  // 操作名称，用于客户端生成接口调用方法名，保证同以tag下唯一
+  // 接口具体名称
   name?: string;
   // 接口标题
   title?: string;
@@ -379,3 +379,35 @@ export interface BriskControllerResultFactory<T> {
 }
 
 ```
+
+## 9. addHook
+
+添加钩子，可以添加控制层前置和后置钩子，方法签名：
+
+```ts
+// 添加钩子
+export function addHook(pos: 'before_start' | 'after_start', hook: BriskControllerHooks): void;
+
+export interface BriskControllerHooks {
+  priority: number;
+  handler: () => Promise<void> | void;
+}
+
+```
+
+## 10. getBaseUrl
+
+获取当前控制层的基地址，方法签名：
+
+```ts
+export function getBaseUrl(): string;
+```
+
+## 11. getSwaggerConfig
+
+获取当前的swagger的配置信息，方法签名：
+
+```ts
+export function getSwaggerConfig(): string;
+```
+
